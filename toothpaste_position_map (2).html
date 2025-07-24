@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>オフィスチェア ポジションマップ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'ヒラギノ角ゴ Pro', 'Yu Gothic Medium', '游ゴシック Medium', YuGothic, 'メイリオ', Meiryo, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .product-list {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 100vh;
+            background: #f8f9fa;
+        }
+
+        .product-list h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 24px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+
+        .product-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+
+        .product-icon {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            flex-shrink: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .product-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .product-icon .fallback-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .product-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .company-name {
+            color: #667eea;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .product-name {
+            color: #2c3e50;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .product-tags {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .tag.price { background: #27ae60; }
+        .tag.rating { background: #f39c12; }
+        .tag.reviews { background: #e74c3c; }
+
+        .product-features {
+            margin: 15px 0;
+        }
+
+        .product-features ul {
+            list-style: disc;
+            margin-left: 20px;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .product-features li {
+            margin-bottom: 5px;
+        }
+
+        .product-description {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.4;
+            text-align: justify;
+        }
+
+        .product-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+
+        .metric {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .metric-label {
+            color: #7f8c8d;
+            font-size: 10px;
+            margin-bottom: 2px;
+        }
+
+        .metric-value {
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .position-map {
+            flex: 1.2;
+            padding: 20px;
+            background: white;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .map-title {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: calc(100% - 60px);
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            border: 3px solid #667eea;
+            margin: 0 auto;
+        }
+
+        .axis-labels {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .axis-label {
+            position: absolute;
+            font-weight: bold;
+            color: white;
+            background: #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .axis-label.top {
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .axis-label.bottom {
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .axis-label.left {
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-90deg);
+            white-space: nowrap;
+        }
+
+        .axis-label.right {
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%) rotate(90deg);
+            white-space: nowrap;
+        }
+
+        .chart-area {
+            position: absolute;
+            top: 60px;
+            left: 60px;
+            right: 60px;
+            bottom: 60px;
+        }
+
+        .axis-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .axis-x, .axis-y {
+            position: absolute;
+            background: #34495e;
+        }
+
+        .axis-x {
+            width: 100%;
+            height: 2px;
+        }
+
+        .axis-y {
+            height: 100%;
+            width: 2px;
+        }
+
+        .axis-numbers {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .axis-number {
+            position: absolute;
+            font-size: 11px;
+            color: #7f8c8d;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .x-number {
+            top: 50%;
+            transform: translateY(8px);
+        }
+
+        .y-number {
+            left: 50%;
+            transform: translateX(8px);
+        }
+
+        .chart-dot {
+            position: absolute;
+            border-radius: 50%;
+            background: #667eea;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .chart-dot:hover {
+            transform: translate(-50%, -50%) scale(1.3) !important;
+            z-index: 20;
+        }
+
+        .chart-dot.highlighted {
+            background: #667eea;
+            transform: translate(-50%, -50%) scale(1);
+            z-index: 15;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+        }
+
+        .quadrant-labels {
+            position: absolute;
+            font-size: 11px;
+            color: #7f8c8d;
+            font-weight: bold;
+            background: rgba(255,255,255,0.8);
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        .quadrant-1 { top: 70px; right: 70px; }
+        .quadrant-2 { top: 70px; left: 70px; }
+        .quadrant-3 { bottom: 70px; left: 70px; }
+        .quadrant-4 { bottom: 70px; right: 70px; }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .position-map {
+                height: 50vh;
+                position: static;
+            }
+            
+            .product-list {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="product-list">
+            <h2>オフィスチェア（16商品）</h2>
+            <div id="productCards"></div>
+        </div>
+
+        <div class="position-map">
+            <div class="map-title">ポジションマップ</div>
+            <div class="map-container">
+                <div class="axis-labels">
+                    <div class="axis-label top">高機能（リクライニング・アーム・フット）</div>
+                    <div class="axis-label bottom">基本機能</div>
+                    <div class="axis-label left">コスパ低</div>
+                    <div class="axis-label right">コスパ高</div>
+                </div>
+                
+                <div class="chart-area" id="chartArea">
+                    <div class="axis-lines">
+                        <div class="axis-x"></div>
+                        <div class="axis-y"></div>
+                    </div>
+                    <div class="axis-numbers" id="axisNumbers"></div>
+                    <div class="quadrant-labels quadrant-1">高機能・高コスパ</div>
+                    <div class="quadrant-labels quadrant-2">高機能・低コスパ</div>
+                    <div class="quadrant-labels quadrant-3">基本機能・低コスパ</div>
+                    <div class="quadrant-labels quadrant-4">基本機能・高コスパ</div>
+                </div>
+                
+                <div class="tooltip" id="tooltip"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // データを定義
+        const chairData = [
+            {
+                company: "モノタロウ",
+                product: "ネットチェア ガス式上下昇降タイプシリンダ",
+                PC1: 0.615664307547097,
+                PC2: -3.17180116226451,
+                eval: 4.0,
+                review_num: 87.0,
+                price: "￥5,698",
+                product_description: "5,698円の最安価格帯で87件のレビュー評価4を獲得。メッシュ素材採用のシンプルデザインで短時間のデスク作業に適している。当日出荷可能だが、肘掛けやヘッドレストなし。"
+            },
+            {
+                company: "モノタロウ",
+                product: "ネットチェア ハイバック 肘掛け付き ヘッドレストあり",
+                PC1: 0.932604019121515,
+                PC2: -0.321945877197829,
+                eval: 4.0,
+                review_num: 69.0,
+                price: "￥7,398",
+                product_description: "7,398円でハイバックタイプ、ヘッドレスト付きの高機能モデル。69件のレビューで評価4。蒸れにくいメッシュ素材で長時間作業に適し、事務作業や会議室用として設計。"
+            },
+            {
+                company: "モノタロウ",
+                product: "メッシュチェア 座面モールドウレタン仕様 肘掛あり 黒色 色(張地)黒",
+                PC1: -0.951508409266293,
+                PC2: 0.620523302291613,
+                eval: 4.0,
+                review_num: 53.0,
+                price: "￥8,998",
+                product_description: "8,998円で広めの座面とモールドウレタン仕様により快適な座り心地を実現。53件のレビューで評価4。肘掛け付きで長時間作業に適している。"
+
+            },
+            {
+                company: "ナカバヤシ",
+                product: "OAネットチェア 肘掛あり ブラック色",
+                PC1: -1.16335595130102,
+                PC2: 0.057086457273409,
+                eval: 3.0,
+                review_num: 22.0,
+                price: "￥18,980",
+                product_description: "18,980円のナカバヤシ製高級モデル。座面と背もたれの連動ロッキング機能付きハイバックタイプ。22件のレビューで評価3と他製品より低め。"
+
+            },
+            {
+                company: "タック",
+                product: "フットレスト付きボスチェア・ライト 肘掛あり",
+                PC1: 0.898191437356452,
+                PC2: 4.24267894257049,
+                eval: 2.5,
+                review_num: 16.0,
+                price: "￥12,980",
+                product_description: "12,980円でリクライニング機能とフットレスト付きのエグゼクティブモデル。ヘッドレスト付きで休憩時に便利だが、16件のレビューで評価2.5。"
+
+            },
+            {
+                company: "不二貿易",
+                product: "メッシュバックチェアー ハンター 2325-11 肘付 肘掛あり",
+                PC1: 1.31074841759461,
+                PC2: 0.130638697083247,
+                eval: 3.5,
+                review_num: 14.0,
+                price: "￥7,698",
+                product_description: "7,698円の不二貿易製。ガス圧昇降式でランバーサポート付き、メッシュ素材で通気性良好。14件のレビューで評価3.5。翌々日出荷で詳細説明が記載なし。"
+
+            },
+            {
+                company: "モノタロウ",
+                product: "ハイバックチェア 座面モールドウレタン仕様",
+                PC1: 0.24632639340197,
+                PC2: -0.239760722259269,
+                eval: 4.0,
+                review_num: 13.0,
+                price: "￥12,980",
+                product_description: "12,980円でモールドウレタン仕様の快適な座り心地。ハイバックで背中全体をサポート、当日出荷可能。13件のレビューで評価4。"
+
+            },
+            {
+                company: "不二貿易",
+                product: "メッシュバックチェアー ハンター 肘付 肘掛あり",
+                PC1: 1.91028807030022,
+                PC2: -0.896521953457946,
+                eval: 4.0,
+                review_num: 13.0,
+                price: "￥7,698",
+                product_description: "7,698円の不二貿易製ハンターシリーズ。13件のレビューで評価4。メッシュ素材で通気性に優れるが、製品説明が記載なしで詳細不明、翌々日出荷。"
+            },
+            {
+                company: "サンワサプライ",
+                product: "メッシュチェア SNC-NET18 ブラック色",
+                PC1: -0.720209792726679,
+                PC2: -0.921416685370829,
+                eval: 4.5,
+                review_num: 12.0,
+                price: "￥9,400",
+                product_description: "9,400円のサンワサプライ製。簡易ランバーサポート機能付きで腰痛対策可能。12件のレビューで評価4.5。メッシュ素材で通気性抜群。"
+            },
+            {
+                company: "不二貿易",
+                product: "メッシュバックチェアー HF-78 肘掛あり",
+                PC1: 2.07813921750982,
+                PC2: 0.451734681528128,
+                eval: 4.5,
+                review_num: 9.0,
+                price: "￥7,698",
+                product_description: "7,698円の不二貿易製。9件のレビューで評価4.5。ガス圧昇降式で高さ調整容易、ロッキング機能付き。翌々日出荷で製品説明が記載なし。"
+            },
+            {
+                company: "不二貿易",
+                product: "メッシュバックチェアー ハンター",
+                PC1: 1.11807012365757,
+                PC2: -1.56044072141256,
+                eval: 4.5,
+                review_num: 8.0,
+                price: "￥6,698",
+                product_description: "6,698円と比較的安価な不二貿易製ハンターシリーズ。8件のレビューで評価4.5。メッシュ素材で通気性良好だが、詳細説明なし、翌々日出荷。"
+            },
+            {
+                company: "YAMAZEN(山善)",
+                product: "爽快メッシュ オフィスチェア",
+                PC1: 0.166026453217752,
+                PC2: -1.05019498392226,
+                eval: 3.5,
+                review_num: 7.0,
+                price: "￥7,598",
+                product_description: "7,598円のYAMAZEN製。ランバーサポート付きで腰部サポート機能あり。メッシュ仕様で蒸れにくく快適使用可能。7件のレビューで評価3.5。"
+            },
+            {
+                company: "モノタロウ",
+                product: "メッシュチェア エルゴノミックタイプ ヘッドレスト 可動肘置き ジャケットハンガー付き",
+                PC1: -0.263410601856819,
+                PC2: 2.35830363716161,
+                eval: 2.5,
+                review_num: 6.0,
+                price: "￥16,980",
+                product_description: "16,980円の最高価格帯でエルゴノミック設計採用。可動肘置き、ジャケットハンガー付きの高機能モデル。エグゼクティブな外観だが、6件のレビューで評価2.5(最低評価)。"
+            },
+            {
+                company: "不二貿易",
+                product: "メッシュバックチェアー HF-98 肘掛あり",
+                PC1: 1.33228565431955,
+                PC2: 0.207432436826874,
+                eval: 4.0,
+                review_num: 6.0,
+                price: "￥12,980",
+                product_description: "12,980円の不二貿易製高機能タイプ。6件のレビューで評価4。ハイバック仕様で体全体をサポート。ガス圧昇降式だが、製品説明記載なし、翌々日出荷。"
+            },
+            {
+                company: "サンワダイレクト",
+                product: "チェア(150-SNCM018) キャスターあり グレー色",
+                PC1: -5.81020316340978,
+                PC2: -0.369852204816606,
+                eval: 4.5,
+                review_num: 5.0,
+                price: "￥13,980",
+                product_description: "13,980円のサンワダイレクト製。清潔感あふれるホワイトシェルデザインで涼しいメッシュ素材使用。5件のレビューで評価4.5。"
+            },
+            {
+                company: "サンワサプライ",
+                product: "メッシュOAチェア 肘あて付き SNC-NET15A 肘掛あり ブラック色",
+                PC1: -1.69965617546597,
+                PC2: 0.463536155966441,
+                eval: 4.0,
+                review_num: 5.0,
+                price: "￥12,980",
+                product_description: "12,980円のサンワサプライ製。丈夫なスチール製脚部で耐久性良好、メッシュ素材で通気性抜群。5件のレビューで評価4。翌々日出荷。"
+            }
+        ];
+
+        // データの範囲を固定値に設定
+        const pc1Range = {
+            min: -6,
+            max: 6
+        };
+        const pc2Range = {
+            min: -6,
+            max: 6
+        };
+
+        // 商品カードを生成
+        function createProductCards() {
+            const container = document.getElementById('productCards');
+            
+            chairData.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.dataset.index = index;
+                
+                // 商品画像のパスを生成（image/商品名.png）
+                const imagePath = `image/${item.product}.png`;
+                const fallbackText = item.company.substring(0, 3);
+                
+                card.innerHTML = `
+                    <div class="product-header">
+                        <div class="product-icon">
+                            <img src="${imagePath}" alt="${item.product}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div class="fallback-text" style="display: none;">画像</div>
+                        </div>
+                        <div class="product-info">
+                            <div class="company-name">${item.company}</div>
+                            <h3 class="product-name">${item.product}</h3>
+                            <div class="product-tags">
+                                <span class="tag price">${item.price}</span>
+                                <span class="tag rating">★${item.eval}</span>
+                                <span class="tag reviews">${item.review_num}件</span>
+                            </div>
+                            <div class="product-features">
+                                <div class="product-description">
+                                    ${item.product_description}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-metrics">
+                        <div class="metric">
+                            <div class="metric-label">コスパ指数</div>
+                            <div class="metric-value">${item.PC1.toFixed(2)}</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">機能指数</div>
+                            <div class="metric-value">${item.PC2.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // チャート上にドットを配置
+        function createChartDots() {
+            const chartArea = document.getElementById('chartArea');
+            
+            // レビュー数の範囲を計算してサイズスケールを決定
+            const reviewRange = {
+                min: Math.min(...chairData.map(d => d.review_num)),
+                max: Math.max(...chairData.map(d => d.review_num))
+            };
+            
+            chairData.forEach((item, index) => {
+                // PC1 (コスパ) -> X軸位置 (左が低コスパ、右が高コスパ)
+                const xPercent = ((item.PC1 - pc1Range.min) / (pc1Range.max - pc1Range.min)) * 100;
+                
+                // PC2 (機能) -> Y軸位置 (下が基本機能、上が高機能)
+                const yPercent = 100 - ((item.PC2 - pc2Range.min) / (pc2Range.max - pc2Range.min)) * 100;
+                
+                // レビュー数に応じてサイズを計算（最小8px、最大24px）
+                const minSize = 8;
+                const maxSize = 24;
+                const normalizedReview = (item.review_num - reviewRange.min) / (reviewRange.max - reviewRange.min);
+                const dotSize = minSize + (maxSize - minSize) * normalizedReview;
+                
+                const dot = document.createElement('div');
+                dot.className = 'chart-dot';
+                dot.dataset.index = index;
+                dot.style.left = `${xPercent}%`;
+                dot.style.top = `${yPercent}%`;
+                dot.style.width = `${dotSize}px`;
+                dot.style.height = `${dotSize}px`;
+                dot.style.transform = 'translate(-50%, -50%)';
+                
+                chartArea.appendChild(dot);
+            });
+        }
+
+        // 軸を0,0の位置に配置
+        function positionAxes() {
+            const axisX = document.querySelector('.axis-x');
+            const axisY = document.querySelector('.axis-y');
+            
+            // X軸をy=0の位置に配置
+            const zeroYPercent = 100 - ((0 - pc2Range.min) / (pc2Range.max - pc2Range.min)) * 100;
+            axisX.style.top = `${zeroYPercent}%`;
+            axisX.style.transform = 'translateY(-50%)';
+            
+            // Y軸をx=0の位置に配置
+            const zeroXPercent = ((0 - pc1Range.min) / (pc1Range.max - pc1Range.min)) * 100;
+            axisY.style.left = `${zeroXPercent}%`;
+            axisY.style.transform = 'translateX(-50%)';
+        }
+
+        // 軸の数値を生成（非表示）
+        function createAxisNumbers() {
+            // 軸の数値は非表示にするため、この関数は空にする
+        }
+
+        // ツールチップとハイライト機能
+        function setupInteractions() {
+            const tooltip = document.getElementById('tooltip');
+            const productCards = document.querySelectorAll('.product-card');
+            const chartDots = document.querySelectorAll('.chart-dot');
+            
+            // チャートドットのマウスオーバー
+            chartDots.forEach(dot => {
+                dot.addEventListener('mouseenter', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    const item = chairData[index];
+                    
+                    tooltip.innerHTML = `
+                        <strong>${item.company}</strong><br>
+                        ${item.product}<br>
+                        ${item.price} ★${item.eval} (${item.review_num}件)
+                    `;
+                    
+                    tooltip.style.left = e.pageX + 10 + 'px';
+                    tooltip.style.top = e.pageY - 10 + 'px';
+                    tooltip.classList.add('visible');
+                    
+                    // 対応するカードをハイライト
+                    productCards[index].style.backgroundColor = '#e8f4fd';
+                    productCards[index].style.transform = 'translateY(-3px)';
+                });
+                
+                dot.addEventListener('mouseleave', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    tooltip.classList.remove('visible');
+                    
+                    // カードのハイライトを解除
+                    productCards[index].style.backgroundColor = 'white';
+                    productCards[index].style.transform = 'translateY(0)';
+                });
+
+                // チャートドットのクリック機能を追加
+                dot.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    const targetCard = productCards[index];
+                    
+                    // スムーズスクロールで対応する商品カードまで移動
+                    targetCard.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                    
+                    // クリックされたカードを一時的にハイライト
+                    targetCard.style.backgroundColor = '#fff3cd';
+                    targetCard.style.border = '3px solid #ffc107';
+                    targetCard.style.transform = 'translateY(-8px)';
+                    
+                    // 2秒後にハイライトを解除
+                    setTimeout(() => {
+                        targetCard.style.backgroundColor = 'white';
+                        targetCard.style.border = 'none';
+                        targetCard.style.transform = 'translateY(0)';
+                    }, 2000);
+                    
+                    // ツールチップを非表示
+                    tooltip.classList.remove('visible');
+                });
+            });
+            
+            // 商品カードのマウスオーバー（ハイライト機能を無効化）
+            productCards.forEach(card => {
+                // マウスオーバー時のプロットハイライト機能を無効化
+                // card.addEventListener('mouseenter', (e) => {
+                //     const index = parseInt(e.currentTarget.dataset.index);
+                //     if (chartDots[index]) {
+                //         chartDots[index].classList.add('highlighted');
+                //     }
+                // });
+                
+                // card.addEventListener('mouseleave', (e) => {
+                //     const index = parseInt(e.currentTarget.dataset.index);
+                //     if (chartDots[index]) {
+                //         chartDots[index].classList.remove('highlighted');
+                //     }
+                // });
+
+                // 商品カードのクリック機能も追加（マップ上の対応する点をハイライト）
+                card.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.dataset.index);
+                    const targetDot = chartDots[index];
+                    
+                    // インデックスが有効かチェック
+                    if (targetDot) {
+                        // 対応するドットを一時的にハイライト
+                        targetDot.style.backgroundColor = '#ffc107';
+                        targetDot.style.transform = 'translate(-50%, -50%) scale(2)';
+                        targetDot.style.boxShadow = '0 4px 12px rgba(255, 193, 7, 0.6)';
+                        
+                        // 2秒後にハイライトを解除
+                        setTimeout(() => {
+                            targetDot.style.backgroundColor = '#667eea';
+                            targetDot.style.transform = 'translate(-50%, -50%) scale(1)';
+                            targetDot.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+                        }, 2000);
+                    }
+                });
+            });
+        }
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            createProductCards();
+            positionAxes();
+            createChartDots();
+            setupInteractions();
+        });
+    </script>
+</body>
+</html>
