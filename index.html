@@ -69,12 +69,18 @@
             text-align: center;
         }
 
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            background: #f8f9fa;
+        }
+
         .product-list {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
-            max-height: 100vh;
-            background: #f8f9fa;
+            max-height: calc(100vh - 200px);
         }
 
         .product-list h2 {
@@ -222,6 +228,69 @@
             font-weight: bold;
         }
 
+        .review-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            height: 200px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .review-title {
+            color: #2c3e50;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .review-content {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .review-placeholder {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            margin: 35px 0;
+        }
+
+        .review-product-name {
+            color: #667eea;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 14px;
+        }
+
+        .review-list {
+            padding: 0;
+            list-style: none;
+        }
+
+        .review-item {
+            background: white;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #555;
+            border: none;
+            box-shadow: none;
+            position: relative;
+        }
+
+        .review-item:before {
+            content: "•";
+            position: absolute;
+            left: 4px;
+            top: 8px;
+            font-size: 12px;
+            color: #888;
+        }
+
         .right-panel {
             flex: 1.2;
             display: flex;
@@ -237,6 +306,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            min-height: 100vh;
         }
 
         .map-tabs {
@@ -317,12 +387,12 @@
         .map-container {
             position: relative;
             width: 100%;
-            height: calc(100% - 80px);
+            flex: 1;
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-radius: 15px;
             border: 3px solid #667eea;
             margin: 0 auto;
-            min-height: 400px;
+            min-height: 500px;
         }
 
         .axis-labels {
@@ -453,80 +523,27 @@
             opacity: 1;
         }
 
-        .review-section {
-            background: #f8f9fa;
-            padding: 14px 20px;
-            border-top: 3px solid #667eea;
-            height: 180px;
-            overflow-y: auto;
-            flex-shrink: 0;
-        }
-
-        .review-title {
-            color: #2c3e50;
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .review-content {
-            color: #555;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .review-placeholder {
-            text-align: center;
-            color: #7f8c8d;
-            font-style: italic;
-            margin: 35px 0;
-        }
-
-        .review-product-name {
-            color: #667eea;
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 14px;
-        }
-
-        .review-list {
-            padding: 0;
-        }
-
-        .review-item {
-            background: white;
-            padding: 14px;
-            margin-bottom: 9px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-            position: relative;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .review-item:before {
-            content: "💬";
-            position: absolute;
-            left: -2px;
-            top: 14px;
-            font-size: 15px;
-        }
-
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
             }
             
-            .right-panel {
+            .left-panel {
                 flex-direction: column;
             }
             
             .position-map {
                 height: 50vh;
                 position: static;
+                min-height: auto;
             }
             
             .product-list {
                 max-height: none;
+            }
+
+            .review-section {
+                height: 150px;
             }
         }
     </style>
@@ -540,9 +557,17 @@
     </div>
 
     <div class="container" id="mainContainer" style="display: none;">
-        <div class="product-list">
-            <h2 id="productListTitle">オフィスチェア</h2>
-            <div id="productCards"></div>
+        <div class="left-panel">
+            <div class="product-list">
+                <h2 id="productListTitle">オフィスチェア</h2>
+                <div id="productCards"></div>
+            </div>
+
+            <div class="review-section">
+                <div class="review-content" id="reviewContent">
+                    <p class="review-placeholder">製品をクリックすると印象が表示されます</p>
+                </div>
+            </div>
         </div>
 
         <div class="right-panel">
@@ -554,7 +579,7 @@
                 
                 <div class="evaluation-buttons" id="evaluationButtons"></div>
                 
-                <div class="map-container" style="flex: 1;">
+                <div class="map-container">
                     <!-- ポジションマップの軸ラベル -->
                     <div class="axis-labels" id="positionAxisLabels">
                         <div class="axis-label top">高機能（リクライニング・アーム・フット）</div>
@@ -596,12 +621,6 @@
                     </div>
                     
                     <div class="tooltip" id="tooltip"></div>
-                </div>
-            </div>
-
-            <div class="review-section">
-                <div class="review-content" id="reviewContent">
-                    <p class="review-placeholder">製品をクリックすると印象が表示されます</p>
                 </div>
             </div>
         </div>
@@ -730,17 +749,14 @@
             document.getElementById('positionTab').classList.toggle('active', mapType === 'position');
             document.getElementById('evaluationTab').classList.toggle('active', mapType === 'evaluation');
             
-            // 評価ボタンの表示/非表示とレビューセクションの調整
+            // 評価ボタンの表示/非表示
             const evaluationButtons = document.getElementById('evaluationButtons');
-            const reviewSection = document.querySelector('.review-section');
             
             if (mapType === 'evaluation') {
                 evaluationButtons.classList.add('active');
                 createEvaluationButtons();
-                reviewSection.style.display = 'none';
             } else {
                 evaluationButtons.classList.remove('active');
-                reviewSection.style.display = 'block';
             }
             
             // 軸ラベルと象限ラベルの表示切り替え
@@ -913,7 +929,7 @@
             }
             
             const reviewsHTML = reviews.map(review => 
-                `<li>${review.text}</li>`
+                `<li class="review-item">${review.text}</li>`
             ).join('');
             
             reviewContent.innerHTML = `
